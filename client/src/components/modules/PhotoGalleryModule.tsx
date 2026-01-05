@@ -1,10 +1,5 @@
 import React, { useRef } from 'react';
-
-interface PhotoGalleryModuleProps {
-  photos: string[];
-  onPhotosChange: (photos: string[]) => void;
-  onRemove: () => void;
-}
+import type { PhotoGalleryModuleProps } from '../../types';
 
 export const PhotoGalleryModule: React.FC<PhotoGalleryModuleProps> = ({
   photos,

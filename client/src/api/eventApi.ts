@@ -1,6 +1,6 @@
 /**
  * Mock API functions for event operations
- * 
+ *
  * To replace with real API:
  * 1. Update the BASE_URL constant
  * 2. Replace mock delays with actual fetch calls
@@ -8,8 +8,12 @@
  * 4. Add authentication headers if needed
  */
 
-import type { EventFormData } from '../types/event.types';
-import type { ApiResponse, ImageUploadResponse, EventSaveResponse } from '../types/api.types';
+import type {
+  EventFormData,
+  ApiResponse,
+  ImageUploadResponse,
+  EventSaveResponse,
+} from '../types';
 
 // Configuration - change this when connecting to real backend
 // const BASE_URL = '/api'; // Replace with your actual API URL
@@ -22,7 +26,7 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
  * Upload an image (flyer or background)
- * 
+ *
  * To replace with real API:
  * const formData = new FormData();
  * formData.append('image', file);
@@ -31,13 +35,15 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
  *   body: formData,
  * });
  */
-export const uploadImage = async (file: File): Promise<ApiResponse<ImageUploadResponse>> => {
+export const uploadImage = async (
+  file: File
+): Promise<ApiResponse<ImageUploadResponse>> => {
   await delay(MOCK_DELAY);
 
   try {
     // Mock implementation - convert to base64 for preview
     const reader = new FileReader();
-    
+
     return new Promise((resolve, reject) => {
       reader.onloadend = () => {
         const url = reader.result as string;
@@ -50,14 +56,14 @@ export const uploadImage = async (file: File): Promise<ApiResponse<ImageUploadRe
           },
         });
       };
-      
+
       reader.onerror = () => {
         reject({
           success: false,
           error: 'Failed to read file',
         });
       };
-      
+
       reader.readAsDataURL(file);
     });
   } catch (error) {
@@ -70,7 +76,7 @@ export const uploadImage = async (file: File): Promise<ApiResponse<ImageUploadRe
 
 /**
  * Save event as draft
- * 
+ *
  * To replace with real API:
  * const response = await fetch(`${BASE_URL}/events`, {
  *   method: 'POST',
@@ -86,14 +92,16 @@ export const saveEventDraft = async (
   try {
     // Mock implementation - store in localStorage
     const drafts = JSON.parse(localStorage.getItem('event_drafts') || '[]');
-    const existingIndex = drafts.findIndex((d: EventFormData) => d.id === eventData.id);
-    
+    const existingIndex = drafts.findIndex(
+      (d: EventFormData) => d.id === eventData.id
+    );
+
     if (existingIndex >= 0) {
       drafts[existingIndex] = eventData;
     } else {
       drafts.push(eventData);
     }
-    
+
     localStorage.setItem('event_drafts', JSON.stringify(drafts));
 
     return {
@@ -114,7 +122,7 @@ export const saveEventDraft = async (
 
 /**
  * Publish event
- * 
+ *
  * To replace with real API:
  * const response = await fetch(`${BASE_URL}/events/${eventData.id}/publish`, {
  *   method: 'POST',
@@ -130,17 +138,21 @@ export const publishEvent = async (
   try {
     // Mock implementation
     const updatedEvent = { ...eventData, status: 'live' as const };
-    
+
     // Save to localStorage as "published"
-    const published = JSON.parse(localStorage.getItem('published_events') || '[]');
-    const existingIndex = published.findIndex((e: EventFormData) => e.id === updatedEvent.id);
-    
+    const published = JSON.parse(
+      localStorage.getItem('published_events') || '[]'
+    );
+    const existingIndex = published.findIndex(
+      (e: EventFormData) => e.id === updatedEvent.id
+    );
+
     if (existingIndex >= 0) {
       published[existingIndex] = updatedEvent;
     } else {
       published.push(updatedEvent);
     }
-    
+
     localStorage.setItem('published_events', JSON.stringify(published));
 
     return {
@@ -161,18 +173,20 @@ export const publishEvent = async (
 
 /**
  * Get event by ID
- * 
+ *
  * To replace with real API:
  * const response = await fetch(`${BASE_URL}/events/${eventId}`);
  */
-export const getEventById = async (eventId: string): Promise<ApiResponse<EventFormData>> => {
+export const getEventById = async (
+  eventId: string
+): Promise<ApiResponse<EventFormData>> => {
   await delay(MOCK_DELAY);
 
   try {
     // Check drafts first
     const drafts = JSON.parse(localStorage.getItem('event_drafts') || '[]');
     const draft = drafts.find((d: EventFormData) => d.id === eventId);
-    
+
     if (draft) {
       return {
         success: true,
@@ -181,9 +195,11 @@ export const getEventById = async (eventId: string): Promise<ApiResponse<EventFo
     }
 
     // Check published events
-    const published = JSON.parse(localStorage.getItem('published_events') || '[]');
+    const published = JSON.parse(
+      localStorage.getItem('published_events') || '[]'
+    );
     const event = published.find((e: EventFormData) => e.id === eventId);
-    
+
     if (event) {
       return {
         success: true,
@@ -205,24 +221,32 @@ export const getEventById = async (eventId: string): Promise<ApiResponse<EventFo
 
 /**
  * Delete event
- * 
+ *
  * To replace with real API:
  * const response = await fetch(`${BASE_URL}/events/${eventId}`, {
  *   method: 'DELETE',
  * });
  */
-export const deleteEvent = async (eventId: string): Promise<ApiResponse<void>> => {
+export const deleteEvent = async (
+  eventId: string
+): Promise<ApiResponse<void>> => {
   await delay(MOCK_DELAY);
 
   try {
     // Remove from drafts
     const drafts = JSON.parse(localStorage.getItem('event_drafts') || '[]');
-    const filteredDrafts = drafts.filter((d: EventFormData) => d.id !== eventId);
+    const filteredDrafts = drafts.filter(
+      (d: EventFormData) => d.id !== eventId
+    );
     localStorage.setItem('event_drafts', JSON.stringify(filteredDrafts));
 
     // Remove from published
-    const published = JSON.parse(localStorage.getItem('published_events') || '[]');
-    const filteredPublished = published.filter((e: EventFormData) => e.id !== eventId);
+    const published = JSON.parse(
+      localStorage.getItem('published_events') || '[]'
+    );
+    const filteredPublished = published.filter(
+      (e: EventFormData) => e.id !== eventId
+    );
     localStorage.setItem('published_events', JSON.stringify(filteredPublished));
 
     return {
@@ -236,4 +260,3 @@ export const deleteEvent = async (eventId: string): Promise<ApiResponse<void>> =
     };
   }
 };
-

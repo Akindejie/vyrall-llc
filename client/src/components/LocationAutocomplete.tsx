@@ -1,16 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-
-interface LocationAutocompleteProps {
-  value: string;
-  onChange: (value: string) => void;
-  placeholder?: string;
-  className?: string;
-}
-
-interface NominatimResult {
-  display_name: string;
-  place_id: number;
-}
+import type { LocationAutocompleteProps, NominatimResult } from '../types';
 
 export const LocationAutocomplete: React.FC<LocationAutocompleteProps> = ({
   value,

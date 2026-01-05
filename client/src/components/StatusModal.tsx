@@ -1,11 +1,5 @@
 import React from 'react';
-
-interface StatusModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  type: 'success' | 'error';
-  messages: string[];
-}
+import type { StatusModalProps } from '../types';
 
 export const StatusModal: React.FC<StatusModalProps> = ({
   isOpen,

@@ -1,10 +1,5 @@
 import React from 'react';
-
-interface AnnouncementsModuleProps {
-  announcement: string;
-  onChange: (text: string) => void;
-  onRemove: () => void;
-}
+import type { AnnouncementsModuleProps } from '../../types';
 
 export const AnnouncementsModule: React.FC<AnnouncementsModuleProps> = ({
   announcement,

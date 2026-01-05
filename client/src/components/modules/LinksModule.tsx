@@ -1,13 +1,5 @@
 import React, { useState } from 'react';
-import type { CustomLink } from '../../types/event.types';
-
-interface LinksModuleProps {
-  links: CustomLink[];
-  onAdd: (title: string, url: string) => void;
-  onRemoveLink: (id: string) => void;
-  onUpdate: (id: string, title: string, url: string) => void;
-  onClose: () => void;
-}
+import type { LinksModuleProps } from '../../types';
 
 export const LinksModule: React.FC<LinksModuleProps> = ({
   links,
@@ -138,4 +130,3 @@ export const LinksModule: React.FC<LinksModuleProps> = ({
     </div>
   );
 };
-

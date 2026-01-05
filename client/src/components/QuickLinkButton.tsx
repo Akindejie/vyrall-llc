@@ -1,13 +1,5 @@
 import React from 'react';
-
-interface QuickLinkButtonProps {
-  icon: string;
-  label: string;
-  onClick: () => void;
-  isActive?: boolean;
-  className?: string;
-  variant?: 'default' | 'text';
-}
+import type { QuickLinkButtonProps } from '../types';
 
 export const QuickLinkButton: React.FC<QuickLinkButtonProps> = ({
   icon,
@@ -42,4 +34,3 @@ export const QuickLinkButton: React.FC<QuickLinkButtonProps> = ({
     </button>
   );
 };
-

@@ -1,13 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-
-interface CurrencyInputProps {
-  amount: string;
-  onAmountChange: (value: string) => void;
-  currencyCode: string;
-  onCurrencyChange: (code: string) => void;
-  placeholder?: string;
-  className?: string;
-}
+import type { CurrencyInputProps } from '../types';
 
 export const CurrencyInput: React.FC<CurrencyInputProps> = ({
   amount,

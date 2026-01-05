@@ -1,10 +1,5 @@
 import React from 'react';
-
-interface CapacityModuleProps {
-  capacity: number | undefined;
-  onChange: (capacity: number) => void;
-  onRemove: () => void;
-}
+import type { CapacityModuleProps } from '../../types';
 
 export const CapacityModule: React.FC<CapacityModuleProps> = ({
   capacity,
@@ -89,4 +84,3 @@ export const CapacityModule: React.FC<CapacityModuleProps> = ({
     </div>
   );
 };
-

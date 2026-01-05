@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import type { EventFormData, ModuleType } from '../types/event.types';
-import { createEmptyEvent } from '../types/event.types';
+import type { EventFormData, ModuleType } from '../types';
+import { createEmptyEvent } from '../types';
 
 interface EventStore {
   // State
@@ -9,7 +9,7 @@ interface EventStore {
   isLoading: boolean;
   error: string | null;
   showCustomizeModal: boolean;
-  
+
   // Actions
   updateEventField: <K extends keyof EventFormData>(
     field: K,
@@ -149,9 +149,9 @@ export const useEventStore = create<EventStore>()(
         }),
 
       setLoading: (isLoading) => set({ isLoading }),
-      
+
       setError: (error) => set({ error }),
-      
+
       setShowCustomizeModal: (show) => set({ showCustomizeModal: show }),
 
       saveEvent: async () => {
@@ -164,7 +164,8 @@ export const useEventStore = create<EventStore>()(
         } catch (error) {
           set({
             isLoading: false,
-            error: error instanceof Error ? error.message : 'Failed to save event',
+            error:
+              error instanceof Error ? error.message : 'Failed to save event',
           });
         }
       },
@@ -185,7 +186,10 @@ export const useEventStore = create<EventStore>()(
         } catch (error) {
           set({
             isLoading: false,
-            error: error instanceof Error ? error.message : 'Failed to publish event',
+            error:
+              error instanceof Error
+                ? error.message
+                : 'Failed to publish event',
           });
         }
       },

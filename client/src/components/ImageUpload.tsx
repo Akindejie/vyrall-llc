@@ -1,12 +1,6 @@
 import React, { useRef, type ChangeEvent } from 'react';
 import { uploadImage } from '../api/eventApi';
-
-interface ImageUploadProps {
-  currentImage: string | null;
-  onImageChange: (imageUrl: string | null) => void;
-  type: 'flyer' | 'background';
-  className?: string;
-}
+import type { ImageUploadProps } from '../types';
 
 export const ImageUpload: React.FC<ImageUploadProps> = ({
   currentImage,
@@ -153,4 +147,3 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
 
   return null;
 };
-

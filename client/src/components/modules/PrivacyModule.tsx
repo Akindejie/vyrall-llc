@@ -1,11 +1,5 @@
 import React from 'react';
-import type { PrivacySettings } from '../../types/event.types';
-
-interface PrivacyModuleProps {
-  privacy: PrivacySettings;
-  onChange: (privacy: PrivacySettings) => void;
-  onRemove: () => void;
-}
+import type { PrivacyModuleProps, PrivacySettings } from '../../types';
 
 export const PrivacyModule: React.FC<PrivacyModuleProps> = ({
   privacy,

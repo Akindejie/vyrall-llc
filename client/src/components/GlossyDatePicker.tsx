@@ -1,11 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-
-interface GlossyDatePickerProps {
-  value: string;
-  onChange: (value: string) => void;
-  placeholder?: string;
-  className?: string;
-}
+import type { GlossyDatePickerProps } from '../types';
 
 export const GlossyDatePicker: React.FC<GlossyDatePickerProps> = ({
   value,

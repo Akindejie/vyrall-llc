@@ -1,19 +1,5 @@
 import React from 'react';
-
-interface ModalToggles {
-  showCapacity: boolean;
-  showLinks: boolean;
-  showPhotoGallery: boolean;
-  showPrivacy: boolean;
-  showAnnouncements: boolean;
-}
-
-interface CustomizeModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  toggles: ModalToggles;
-  onToggle: (key: keyof ModalToggles) => void;
-}
+import type { CustomizeModalProps, ModalToggles } from '../types';
 
 export const CustomizeModal: React.FC<CustomizeModalProps> = ({
   isOpen,
@@ -143,4 +129,3 @@ export const CustomizeModal: React.FC<CustomizeModalProps> = ({
     </div>
   );
 };
-

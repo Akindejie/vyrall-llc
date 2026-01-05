@@ -1,17 +1,5 @@
 import React from 'react';
-
-interface FormInputProps {
-  icon: string;
-  placeholder: string;
-  value: string;
-  onChange: (value: string) => void;
-  type?: 'text' | 'tel' | 'datetime-local' | 'number';
-  showButton?: boolean;
-  buttonIcon?: string;
-  onButtonClick?: () => void;
-  className?: string;
-  variant?: 'default' | 'ghost'; // Added variant prop
-}
+import type { FormInputProps, FormTextareaProps } from '../types';
 
 export const FormInput: React.FC<FormInputProps> = ({
   icon,
@@ -58,14 +46,6 @@ export const FormInput: React.FC<FormInputProps> = ({
   );
 };
 
-interface FormTextareaProps {
-  placeholder: string;
-  value: string;
-  onChange: (value: string) => void;
-  rows?: number;
-  className?: string;
-}
-
 export const FormTextarea: React.FC<FormTextareaProps> = ({
   placeholder,
   value,
@@ -87,4 +67,3 @@ export const FormTextarea: React.FC<FormTextareaProps> = ({
     </div>
   );
 };
-
