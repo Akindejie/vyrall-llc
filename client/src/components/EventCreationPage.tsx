@@ -2,10 +2,20 @@ import React, { useState } from 'react';
 import { useEventStore } from '../store/eventStore';
 import { ImageUpload } from './ImageUpload';
 import { BackgroundChanger } from './BackgroundChanger';
+import { GlossyDatePicker } from './GlossyDatePicker';
+import { LocationAutocomplete } from './LocationAutocomplete';
+import { CurrencyInput } from './CurrencyInput';
 import { FormInput, FormTextarea } from './FormInput';
 import { QuickLinkButton } from './QuickLinkButton';
-import { CapacityModule, LinksModule } from './modules';
+import {
+  CapacityModule,
+  LinksModule,
+  PhotoGalleryModule,
+  PrivacyModule,
+  AnnouncementsModule,
+} from './modules';
 import { CustomizeModal } from './CustomizeModal';
+import { StatusModal } from './StatusModal';
 
 export const EventCreationPage: React.FC = () => {
   const {
@@ -21,22 +31,42 @@ export const EventCreationPage: React.FC = () => {
     saveEvent,
     setShowCustomizeModal,
     showCustomizeModal,
+    resetEvent,
   } = useEventStore();
 
   const [showCapacity, setShowCapacity] = useState(false);
   const [showPhotoGallery, setShowPhotoGallery] = useState(false);
   const [showLinks, setShowLinks] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
+  const [showAnnouncements, setShowAnnouncements] = useState(false);
+
+  // Status Modal State
+  const [showStatusModal, setShowStatusModal] = useState(false);
+  const [statusType, setStatusType] = useState<'success' | 'error'>('success');
+  const [statusMessages, setStatusMessages] = useState<string[]>([]);
+
+  const [showAllQuickLinks, setShowAllQuickLinks] = useState(false);
 
   const handlePublish = async () => {
-    // Basic validation
-    if (!currentEvent.name) {
-      alert('Please enter an event name');
+    const missingFields: string[] = [];
+
+    if (!currentEvent.name) missingFields.push('Event Name');
+    if (!currentEvent.dateTime) missingFields.push('Date & Time');
+    if (!currentEvent.location) missingFields.push('Location');
+    // Add more validation if strict needed (e.g., Image?)
+
+    if (missingFields.length > 0) {
+      setStatusType('error');
+      setStatusMessages(missingFields);
+      setShowStatusModal(true);
       return;
     }
 
     try {
       await publishEvent();
-      alert('Event published successfully! 🎉');
+      setStatusType('success');
+      setStatusMessages([]);
+      setShowStatusModal(true);
     } catch (error) {
       alert('Failed to publish event');
     }
@@ -55,7 +85,7 @@ export const EventCreationPage: React.FC = () => {
     <div className="min-h-screen w-full">
       {/* Background overlay */}
       {currentEvent.backgroundImage && (
-        <div 
+        <div
           className="fixed inset-0 bg-cover bg-center bg-no-repeat"
           style={{ backgroundImage: `url(${currentEvent.backgroundImage})` }}
         />
@@ -66,15 +96,25 @@ export const EventCreationPage: React.FC = () => {
       <div className="relative z-10 container mx-auto px-6 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold text-white">let's hang</h1>
-          <div className="flex items-center gap-4">
-            <button className="text-white hover:text-white/80 transition-colors">Home</button>
-            <button className="text-white hover:text-white/80 transition-colors">People</button>
-            <button className="text-white hover:text-white/80 transition-colors">Search</button>
-            <button className="px-6 py-2 rounded-full bg-white/20 hover:bg-white/30 text-white transition-colors">
-              Sign in
-            </button>
+          <div className="flex items-center gap-8">
+            <h1 className="text-3xl font-bold text-white font-display tracking-tight">
+              let's hang
+            </h1>
+            <div className="flex items-center gap-4">
+              <button className="text-white/70 hover:text-white transition-colors">
+                Home
+              </button>
+              <button className="text-white/70 hover:text-white transition-colors">
+                People
+              </button>
+              <button className="text-white/70 hover:text-white transition-colors">
+                Search
+              </button>
+            </div>
           </div>
+          <button className="px-6 py-2 rounded-full bg-white/20 hover:bg-white/30 text-white transition-colors">
+            Sign in
+          </button>
         </div>
 
         {/* Main layout */}
@@ -91,7 +131,13 @@ export const EventCreationPage: React.FC = () => {
 
           {/* Right side - Form */}
           <div className="space-y-4">
-            <h2 className="text-4xl font-bold text-white mb-6">Name your event</h2>
+            <input
+              type="text"
+              value={currentEvent.name}
+              onChange={(e) => updateEventField('name', e.target.value)}
+              placeholder="Name your event"
+              className="w-full bg-transparent outline-none text-4xl font-bold text-white placeholder-white/50 mb-6"
+            />
 
             {/* Phone number input */}
             <FormInput
@@ -106,25 +152,29 @@ export const EventCreationPage: React.FC = () => {
             />
 
             {/* Event details card */}
-            <div className="bg-white/15 backdrop-blur-md rounded-3xl p-6 space-y-4 border border-white/20">
-              <FormInput
-                icon="📅"
-                placeholder="Date and time"
+            <div className="bg-black/20 backdrop-blur-sm rounded-3xl border border-white/20 relative z-20">
+              <GlossyDatePicker
                 value={currentEvent.dateTime}
                 onChange={(value) => updateEventField('dateTime', value)}
-                type="datetime-local"
+                placeholder="Date and time"
               />
-              <FormInput
-                icon="📍"
-                placeholder="Location"
+              <div className="h-[1px] bg-white/10 mx-5" />
+              <LocationAutocomplete
                 value={currentEvent.location}
                 onChange={(value) => updateEventField('location', value)}
+                placeholder="Location"
               />
-              <FormInput
-                icon="💰"
+              <div className="h-[1px] bg-white/10 mx-5" />
+              <CurrencyInput
+                amount={currentEvent.costPerPerson}
+                onAmountChange={(value) =>
+                  updateEventField('costPerPerson', value)
+                }
+                currencyCode={currentEvent.costCurrency || 'USD'}
+                onCurrencyChange={(code) =>
+                  updateEventField('costCurrency', code)
+                }
                 placeholder="Cost per person"
-                value={currentEvent.costPerPerson}
-                onChange={(value) => updateEventField('costPerPerson', value)}
               />
             </div>
 
@@ -149,8 +199,35 @@ export const EventCreationPage: React.FC = () => {
               <LinksModule
                 links={currentEvent.links}
                 onAdd={addLink}
-                onRemove={removeLink}
+                onRemoveLink={removeLink}
                 onUpdate={updateLink}
+                onClose={() => setShowLinks(false)}
+              />
+            )}
+
+            {showPhotoGallery && (
+              <PhotoGalleryModule
+                photos={currentEvent.photoGallery}
+                onPhotosChange={(photos) =>
+                  updateEventField('photoGallery', photos)
+                }
+                onRemove={() => setShowPhotoGallery(false)}
+              />
+            )}
+
+            {showPrivacy && (
+              <PrivacyModule
+                privacy={currentEvent.privacy}
+                onChange={(privacy) => updateEventField('privacy', privacy)}
+                onRemove={() => setShowPrivacy(false)}
+              />
+            )}
+
+            {showAnnouncements && (
+              <AnnouncementsModule
+                announcement={currentEvent.announcements}
+                onChange={(text) => updateEventField('announcements', text)}
+                onRemove={() => setShowAnnouncements(false)}
               />
             )}
 
@@ -165,7 +242,7 @@ export const EventCreationPage: React.FC = () => {
               )}
               {!showPhotoGallery && (
                 <QuickLinkButton
-                  icon="📸"
+                  icon="�️"
                   label="Photo gallery"
                   onClick={() => setShowPhotoGallery(true)}
                 />
@@ -177,36 +254,152 @@ export const EventCreationPage: React.FC = () => {
                   onClick={() => setShowLinks(true)}
                 />
               )}
+
+              {showAllQuickLinks && (
+                <>
+                  {!showPrivacy && (
+                    <QuickLinkButton
+                      icon="🔒"
+                      label="Privacy"
+                      onClick={() => setShowPrivacy(true)}
+                    />
+                  )}
+                  {!showAnnouncements && (
+                    <QuickLinkButton
+                      icon="📢"
+                      label="Announcements"
+                      onClick={() => setShowAnnouncements(true)}
+                    />
+                  )}
+                </>
+              )}
+
               <QuickLinkButton
-                icon="..."
-                label="Show more"
-                onClick={() => {}}
+                icon={showAllQuickLinks ? '↑' : '...'}
+                label={showAllQuickLinks ? 'Show less' : 'Show more'}
+                onClick={() => setShowAllQuickLinks(!showAllQuickLinks)}
+                variant="text"
               />
             </div>
 
             {/* Customize section */}
-            <div className="bg-white/10 backdrop-blur-md rounded-3xl p-8 border border-white/20">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex-1 text-center">
-                  <div className="flex justify-center items-center gap-6 mb-4">
-                    <span className="text-3xl">📢</span>
-                    <span className="text-3xl">🎲</span>
-                    <span className="text-3xl">👥</span>
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-2">
-                    Customize your event your way
-                  </h3>
-                  <div className="flex justify-center gap-4 mt-4">
-                    <span className="text-3xl">🔗</span>
-                    <span className="text-3xl">📸</span>
-                    <span className="text-3xl text-2xl">RSVP</span>
-                  </div>
-                </div>
+            <div className="bg-black/20 backdrop-blur-md rounded-3xl p-6 border border-white/10 relative overflow-hidden min-h-[220px] flex flex-col justify-end">
+              {/* Scattered Icons */}
+              {/* Top Left - List */}
+              <div className="absolute top-8 left-16 opacity-40 rotate-[-12deg]">
+                <svg
+                  width="40"
+                  height="40"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="8" y1="6" x2="21" y2="6"></line>
+                  <line x1="8" y1="12" x2="21" y2="12"></line>
+                  <line x1="8" y1="18" x2="21" y2="18"></line>
+                  <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                  <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                  <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                </svg>
               </div>
+
+              {/* Mid Left - Megaphone */}
+              <div className="absolute top-24 left-8 opacity-40 rotate-12">
+                <svg
+                  width="48"
+                  height="48"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M12 8l-4.8 2.4a2 2 0 0 0 .8 3.6h4"></path>
+                  <path d="M17 12a5 5 0 0 0-5-5V2"></path>
+                  <path d="M7 16l-3 4"></path>
+                  <path d="M7 10.5V16h4.5"></path>
+                  <path d="M21 16a2 2 0 0 0-2-2"></path>
+                  <path d="M18 17a4 4 0 0 1-4-4"></path>
+                </svg>
+              </div>
+
+              {/* Bottom Left - People */}
+              <div className="absolute bottom-24 left-20 opacity-40 rotate-[-8deg]">
+                <svg
+                  width="32"
+                  height="32"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+              </div>
+
+              {/* Top Right - Link */}
+              <div className="absolute top-8 right-16 opacity-40 rotate-45">
+                <svg
+                  width="36"
+                  height="36"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                </svg>
+              </div>
+
+              {/* Mid Right - Image */}
+              <div className="absolute top-16 right-6 opacity-40 rotate-[-15deg]">
+                <svg
+                  width="44"
+                  height="44"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                  <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+              </div>
+
+              {/* Bottom Right - RSVP */}
+              <div className="absolute bottom-24 right-14 opacity-40 rotate-12">
+                <span className="text-2xl font-black text-white tracking-wider outline-text">
+                  RSVP
+                </span>
+              </div>
+
+              <div className="relative z-10 w-full text-center mt-12 mb-6">
+                <h3 className="text-white text-xl font-medium tracking-wide">
+                  Customize your
+                  <br />
+                  event your way
+                </h3>
+              </div>
+
               <button
                 onClick={() => setShowCustomizeModal(true)}
-                className="w-full py-4 rounded-2xl bg-white/20 hover:bg-white/30 
-                  text-white font-medium transition-colors flex items-center justify-center gap-2"
+                className="relative z-10 w-full py-4 rounded-xl bg-white/20 hover:bg-white/25 
+                  text-white font-medium transition-all flex items-center justify-center gap-2"
               >
                 <span className="text-xl">🎨</span>
                 Customize
@@ -231,8 +424,53 @@ export const EventCreationPage: React.FC = () => {
       <CustomizeModal
         isOpen={showCustomizeModal}
         onClose={() => setShowCustomizeModal(false)}
+        toggles={{
+          showCapacity,
+          showLinks,
+          showPhotoGallery,
+          showPrivacy,
+          showAnnouncements,
+        }}
+        onToggle={(key) => {
+          switch (key) {
+            case 'showCapacity':
+              setShowCapacity(!showCapacity);
+              break;
+            case 'showLinks':
+              setShowLinks(!showLinks);
+              break;
+            case 'showPhotoGallery':
+              setShowPhotoGallery(!showPhotoGallery);
+              break;
+            case 'showPrivacy':
+              setShowPrivacy(!showPrivacy);
+              break;
+            case 'showAnnouncements':
+              setShowAnnouncements(!showAnnouncements);
+              break;
+          }
+        }}
+      />
+
+      {/* Status Modal */}
+      <StatusModal
+        isOpen={showStatusModal}
+        type={statusType}
+        messages={statusMessages}
+        onClose={() => {
+          setShowStatusModal(false);
+          if (statusType === 'success') {
+            resetEvent();
+            // Reset local UI toggles as well
+            setShowCapacity(false);
+            setShowPhotoGallery(false);
+            setShowLinks(false);
+            setShowPrivacy(false);
+            setShowAnnouncements(false);
+            setShowAllQuickLinks(false);
+          }
+        }}
       />
     </div>
   );
 };
-

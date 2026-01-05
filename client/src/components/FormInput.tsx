@@ -10,6 +10,7 @@ interface FormInputProps {
   buttonIcon?: string;
   onButtonClick?: () => void;
   className?: string;
+  variant?: 'default' | 'ghost'; // Added variant prop
 }
 
 export const FormInput: React.FC<FormInputProps> = ({
@@ -22,11 +23,20 @@ export const FormInput: React.FC<FormInputProps> = ({
   buttonIcon,
   onButtonClick,
   className = '',
+  variant = 'default', // Default to 'default'
 }) => {
+  const baseStyles = 'flex items-center gap-3 px-5 py-4 transition-colors';
+  const defaultStyles =
+    'bg-black/20 backdrop-blur-sm rounded-2xl border border-white/20 hover:bg-black/30 focus-within:bg-black/30';
+  const ghostStyles = 'hover:bg-white/5 focus-within:bg-white/5';
+
   return (
     <div className={`relative ${className}`}>
-      <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-2xl px-5 py-4 
-        border border-white/20 hover:bg-white/15 focus-within:bg-white/15 transition-colors">
+      <div
+        className={`${baseStyles} ${
+          variant === 'default' ? defaultStyles : ghostStyles
+        }`}
+      >
         <span className="text-xl">{icon}</span>
         <input
           type={type}
@@ -70,11 +80,10 @@ export const FormTextarea: React.FC<FormTextareaProps> = ({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         rows={rows}
-        className="w-full bg-white/10 backdrop-blur-sm rounded-2xl px-5 py-4 
-          border border-white/20 hover:bg-white/15 focus:bg-white/15 transition-colors
+        className="w-full bg-black/20 backdrop-blur-sm rounded-2xl px-5 py-4 
+          border border-white/20 hover:bg-black/30 focus:bg-black/30 transition-colors
           text-white placeholder-white/60 outline-none resize-none custom-scrollbar"
       />
     </div>
   );
 };
-

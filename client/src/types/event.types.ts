@@ -2,6 +2,40 @@
  * Core event types for the event creation system
  */
 
+import type { ReactNode } from 'react';
+
+// Base types - defined first
+export interface CustomLink {
+  id: string;
+  title: string;
+  url: string;
+  icon?: string;
+}
+
+export interface PrivacySettings {
+  isPublic: boolean;
+  requireApproval: boolean;
+  hideGuestList: boolean;
+}
+
+export type ModuleType =
+  | 'capacity'
+  | 'photo_gallery'
+  | 'links'
+  | 'privacy'
+  | 'announcements'
+  | 'rsvp'
+  | 'custom';
+
+export interface CustomModule {
+  id: string;
+  type: ModuleType;
+  config: Record<string, any>;
+  order: number;
+  isActive: boolean;
+}
+
+// Main event type - uses the base types above
 export interface EventFormData {
   id: string;
   name: string;
@@ -9,6 +43,7 @@ export interface EventFormData {
   dateTime: string;
   location: string;
   costPerPerson: string;
+  costCurrency: string;
   description: string;
   capacity?: number;
   flyerImage: string | null;
@@ -23,42 +58,12 @@ export interface EventFormData {
   updatedAt: string;
 }
 
-export interface CustomLink {
-  id: string;
-  title: string;
-  url: string;
-  icon?: string;
-}
-
-export interface PrivacySettings {
-  isPublic: boolean;
-  requireApproval: boolean;
-  hideGuestList: boolean;
-}
-
-export interface CustomModule {
-  id: string;
-  type: ModuleType;
-  config: Record<string, any>;
-  order: number;
-  isActive: boolean;
-}
-
-export type ModuleType = 
-  | 'capacity'
-  | 'photo_gallery'
-  | 'links'
-  | 'privacy'
-  | 'announcements'
-  | 'rsvp'
-  | 'custom';
-
 export interface ModuleDefinition {
   type: ModuleType;
   label: string;
   icon: string;
   description: string;
-  renderComponent: (config: any, onChange: (config: any) => void) => React.ReactNode;
+  renderComponent: (config: any, onChange: (config: any) => void) => ReactNode;
 }
 
 export interface EventCreationState {
@@ -76,6 +81,7 @@ export const createEmptyEvent = (): EventFormData => ({
   dateTime: '',
   location: '',
   costPerPerson: '',
+  costCurrency: 'USD',
   description: '',
   capacity: undefined,
   flyerImage: null,
@@ -93,4 +99,3 @@ export const createEmptyEvent = (): EventFormData => ({
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
 });
-

@@ -1,18 +1,20 @@
 import React, { useState } from 'react';
-import { CustomLink } from '../../types/event.types';
+import type { CustomLink } from '../../types/event.types';
 
 interface LinksModuleProps {
   links: CustomLink[];
   onAdd: (title: string, url: string) => void;
-  onRemove: (id: string) => void;
+  onRemoveLink: (id: string) => void;
   onUpdate: (id: string, title: string, url: string) => void;
+  onClose: () => void;
 }
 
 export const LinksModule: React.FC<LinksModuleProps> = ({
   links,
   onAdd,
-  onRemove,
+  onRemoveLink,
   onUpdate,
+  onClose,
 }) => {
   const [isAdding, setIsAdding] = useState(false);
   const [newLinkTitle, setNewLinkTitle] = useState('');
@@ -32,8 +34,8 @@ export const LinksModule: React.FC<LinksModuleProps> = ({
       {links.map((link) => (
         <div
           key={link.id}
-          className="bg-white/10 backdrop-blur-sm rounded-2xl px-5 py-4 
-            border border-white/20 hover:bg-white/15 transition-colors"
+          className="bg-black/20 backdrop-blur-sm rounded-2xl px-5 py-4 
+            border border-white/20 hover:bg-black/30 transition-colors"
         >
           <div className="flex items-center gap-3">
             <span className="text-xl">🔗</span>
@@ -54,11 +56,21 @@ export const LinksModule: React.FC<LinksModuleProps> = ({
               />
             </div>
             <button
-              onClick={() => onRemove(link.id)}
+              onClick={() => onRemoveLink(link.id)}
               className="text-white/60 hover:text-white transition-colors"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
@@ -66,8 +78,10 @@ export const LinksModule: React.FC<LinksModuleProps> = ({
       ))}
 
       {isAdding ? (
-        <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-5 py-4 
-          border border-white/20 space-y-3">
+        <div
+          className="bg-black/20 backdrop-blur-sm rounded-2xl px-5 py-4 
+          border border-white/20 space-y-3"
+        >
           <div className="flex items-center gap-3">
             <span className="text-xl">🔗</span>
             <input
@@ -103,15 +117,24 @@ export const LinksModule: React.FC<LinksModuleProps> = ({
       ) : (
         <button
           onClick={() => setIsAdding(true)}
-          className="w-full py-4 px-5 rounded-2xl bg-white/10 backdrop-blur-sm 
-            border border-white/20 hover:bg-white/15 transition-colors
+          className="w-full py-4 px-5 rounded-2xl bg-black/20 backdrop-blur-sm 
+            border border-white/20 hover:bg-black/30 transition-colors
             text-white/80 flex items-center justify-center gap-2"
         >
           <span className="text-xl">+</span>
           <span>Add another link</span>
         </button>
       )}
+
+      {/* Close/Remove Module Button (if needed, or just let users toggle via Quick Links) */}
+      <div className="flex justify-end pt-2">
+        <button
+          onClick={onClose}
+          className="text-white/40 hover:text-white/60 text-sm flex items-center gap-1 transition-colors"
+        >
+          <span>Close Links</span>
+        </button>
+      </div>
     </div>
   );
 };
-

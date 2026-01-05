@@ -1,4 +1,4 @@
-import React, { useRef, ChangeEvent } from 'react';
+import React, { useRef, type ChangeEvent } from 'react';
 import { uploadImage } from '../api/eventApi';
 
 interface BackgroundChangerProps {
@@ -68,4 +68,3 @@ export const BackgroundChanger: React.FC<BackgroundChangerProps> = ({
     </>
   );
 };
-
