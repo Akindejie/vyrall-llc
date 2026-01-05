@@ -143,3 +143,4 @@ export const CustomizeModal: React.FC<CustomizeModalProps> = ({
     </div>
   );
 };
+

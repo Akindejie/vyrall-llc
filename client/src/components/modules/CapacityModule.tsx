@@ -89,3 +89,4 @@ export const CapacityModule: React.FC<CapacityModuleProps> = ({
     </div>
   );
 };
+

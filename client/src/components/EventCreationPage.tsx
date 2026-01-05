@@ -474,3 +474,4 @@ export const EventCreationPage: React.FC = () => {
     </div>
   );
 };
+
