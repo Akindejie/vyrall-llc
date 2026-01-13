@@ -57,6 +57,7 @@ export interface CustomModule {
 
 export interface EventFormData {
   id: string;
+  userId?: string; // User ID of the event creator
   name: string;
   phoneNumber: string;
   dateTime: string;
@@ -124,6 +125,7 @@ export const createEmptyEvent = (): EventFormData => ({
 export interface BackgroundChangerProps {
   onBackgroundChange: (imageUrl: string | null) => void;
   className?: string;
+  onFileSizeError?: (message: string) => void;
 }
 
 export interface CurrencyInputProps {
@@ -155,7 +157,7 @@ export interface FormInputProps {
   placeholder: string;
   value: string;
   onChange: (value: string) => void;
-  type?: 'text' | 'tel' | 'datetime-local' | 'number';
+  type?: 'text' | 'tel' | 'datetime-local' | 'number' | 'email' | 'password';
   showButton?: boolean;
   buttonIcon?: string;
   onButtonClick?: () => void;
@@ -183,6 +185,7 @@ export interface ImageUploadProps {
   onImageChange: (imageUrl: string | null) => void;
   type: 'flyer' | 'background';
   className?: string;
+  onFileSizeError?: (message: string) => void;
 }
 
 export interface LocationAutocompleteProps {
@@ -237,6 +240,7 @@ export interface PhotoGalleryModuleProps {
   photos: string[];
   onPhotosChange: (photos: string[]) => void;
   onRemove: () => void;
+  onFileSizeError?: (message: string) => void;
 }
 
 export interface PrivacyModuleProps {

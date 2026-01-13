@@ -55,3 +55,5 @@ The project strictly adheres to a premium dark-glass aesthetic:
 3.  **View Update**: `EventCreationPage` reacts to state changes and conditionally renders the corresponding Module.
 4.  **Publish**: Validates required fields -> Shows `StatusModal` -> Resets state on success.
 
+
+

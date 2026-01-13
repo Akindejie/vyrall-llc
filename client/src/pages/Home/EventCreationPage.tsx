@@ -1,23 +1,39 @@
-import React, { useState } from 'react';
-import { useEventStore } from '../store/eventStore';
-import { ImageUpload } from './ImageUpload';
-import { BackgroundChanger } from './BackgroundChanger';
-import { GlossyDatePicker } from './GlossyDatePicker';
-import { LocationAutocomplete } from './LocationAutocomplete';
-import { CurrencyInput } from './CurrencyInput';
-import { FormInput, FormTextarea } from './FormInput';
-import { QuickLinkButton } from './QuickLinkButton';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useRecoilValue, useRecoilState } from 'recoil';
+import { Header } from '../../components/Header';
+import { useEventStore } from '../../store/eventStore';
+import {
+  userState,
+  showCapacityState,
+  showPhotoGalleryState,
+  showLinksState,
+  showPrivacyState,
+  showAnnouncementsState,
+  showAllQuickLinksState,
+  showStatusModalState,
+  statusTypeState,
+  statusMessagesState,
+} from '../../store/atoms';
+import { ImageUpload } from '../../components/ImageUpload';
+import { BackgroundChanger } from '../../components/BackgroundChanger';
+import { GlossyDatePicker } from '../../components/GlossyDatePicker';
+import { LocationAutocomplete } from '../../components/LocationAutocomplete';
+import { CurrencyInput } from '../../components/CurrencyInput';
+import { FormInput, FormTextarea } from '../../components/FormInput';
+import { QuickLinkButton } from '../../components/QuickLinkButton';
 import {
   CapacityModule,
   LinksModule,
   PhotoGalleryModule,
   PrivacyModule,
   AnnouncementsModule,
-} from './modules';
-import { CustomizeModal } from './CustomizeModal';
-import { StatusModal } from './StatusModal';
+} from '../../components/modules';
+import { CustomizeModal } from '../../components/CustomizeModal';
+import { StatusModal } from '../../components/StatusModal';
 
 export const EventCreationPage: React.FC = () => {
+  const navigate = useNavigate();
   const {
     currentEvent,
     updateEventField,
@@ -34,18 +50,24 @@ export const EventCreationPage: React.FC = () => {
     resetEvent,
   } = useEventStore();
 
-  const [showCapacity, setShowCapacity] = useState(false);
-  const [showPhotoGallery, setShowPhotoGallery] = useState(false);
-  const [showLinks, setShowLinks] = useState(false);
-  const [showPrivacy, setShowPrivacy] = useState(false);
-  const [showAnnouncements, setShowAnnouncements] = useState(false);
-
-  // Status Modal State
-  const [showStatusModal, setShowStatusModal] = useState(false);
-  const [statusType, setStatusType] = useState<'success' | 'error'>('success');
-  const [statusMessages, setStatusMessages] = useState<string[]>([]);
-
-  const [showAllQuickLinks, setShowAllQuickLinks] = useState(false);
+  const user = useRecoilValue(userState);
+  const [showCapacity, setShowCapacity] = useRecoilState(showCapacityState);
+  const [showPhotoGallery, setShowPhotoGallery] = useRecoilState(
+    showPhotoGalleryState
+  );
+  const [showLinks, setShowLinks] = useRecoilState(showLinksState);
+  const [showPrivacy, setShowPrivacy] = useRecoilState(showPrivacyState);
+  const [showAnnouncements, setShowAnnouncements] = useRecoilState(
+    showAnnouncementsState
+  );
+  const [showAllQuickLinks, setShowAllQuickLinks] = useRecoilState(
+    showAllQuickLinksState
+  );
+  const [showStatusModal, setShowStatusModal] =
+    useRecoilState(showStatusModalState);
+  const [statusType, setStatusType] = useRecoilState(statusTypeState);
+  const [statusMessages, setStatusMessages] =
+    useRecoilState(statusMessagesState);
 
   const handlePublish = async () => {
     const missingFields: string[] = [];
@@ -63,22 +85,47 @@ export const EventCreationPage: React.FC = () => {
     }
 
     try {
-      await publishEvent();
+      await publishEvent(user?.uid);
       setStatusType('success');
       setStatusMessages([]);
       setShowStatusModal(true);
     } catch (error) {
-      alert('Failed to publish event');
+      // Catch backend errors (like file size too large) and show in modal
+      let errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Failed to publish event. Please try again.';
+
+      // Enhance error message if it's about file size but doesn't mention max size
+      if (
+        errorMessage.includes('too large') &&
+        !errorMessage.includes('Maximum allowed')
+      ) {
+        const MAX_TOTAL_SIZE_KB = 1000; // 1MB = 1000KB
+        if (!errorMessage.includes(`${MAX_TOTAL_SIZE_KB}KB`)) {
+          errorMessage = `${errorMessage} Maximum allowed total size is ${MAX_TOTAL_SIZE_KB}KB.`;
+        }
+      }
+
+      setStatusType('error');
+      setStatusMessages([errorMessage]);
+      setShowStatusModal(true);
     }
   };
 
   const handleSaveDraft = async () => {
     try {
-      await saveEvent();
+      await saveEvent(user?.uid);
       alert('Draft saved successfully!');
-    } catch (error) {
+    } catch {
       alert('Failed to save draft');
     }
+  };
+
+  const handleFileSizeError = (message: string) => {
+    setStatusType('error');
+    setStatusMessages([message]);
+    setShowStatusModal(true);
   };
 
   return (
@@ -95,27 +142,7 @@ export const EventCreationPage: React.FC = () => {
       {/* Main content */}
       <div className="relative z-10 container mx-auto px-6 py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-8">
-            <h1 className="text-3xl font-bold text-white font-display tracking-tight">
-              let's hang
-            </h1>
-            <div className="flex items-center gap-4">
-              <button className="text-white/70 hover:text-white transition-colors">
-                Home
-              </button>
-              <button className="text-white/70 hover:text-white transition-colors">
-                People
-              </button>
-              <button className="text-white/70 hover:text-white transition-colors">
-                Search
-              </button>
-            </div>
-          </div>
-          <button className="px-6 py-2 rounded-full bg-white/20 hover:bg-white/30 text-white transition-colors">
-            Sign in
-          </button>
-        </div>
+        <Header />
 
         {/* Main layout */}
         <div className="grid grid-cols-2 gap-8 max-w-7xl mx-auto">
@@ -125,8 +152,12 @@ export const EventCreationPage: React.FC = () => {
               currentImage={currentEvent.flyerImage}
               onImageChange={setFlyerImage}
               type="flyer"
+              onFileSizeError={handleFileSizeError}
             />
-            <BackgroundChanger onBackgroundChange={setBackgroundImage} />
+            <BackgroundChanger
+              onBackgroundChange={setBackgroundImage}
+              onFileSizeError={handleFileSizeError}
+            />
           </div>
 
           {/* Right side - Form */}
@@ -212,6 +243,7 @@ export const EventCreationPage: React.FC = () => {
                   updateEventField('photoGallery', photos)
                 }
                 onRemove={() => setShowPhotoGallery(false)}
+                onFileSizeError={handleFileSizeError}
               />
             )}
 
@@ -242,7 +274,7 @@ export const EventCreationPage: React.FC = () => {
               )}
               {!showPhotoGallery && (
                 <QuickLinkButton
-                  icon="�️"
+                  icon="️"
                   label="Photo gallery"
                   onClick={() => setShowPhotoGallery(true)}
                 />
@@ -461,13 +493,8 @@ export const EventCreationPage: React.FC = () => {
           setShowStatusModal(false);
           if (statusType === 'success') {
             resetEvent();
-            // Reset local UI toggles as well
-            setShowCapacity(false);
-            setShowPhotoGallery(false);
-            setShowLinks(false);
-            setShowPrivacy(false);
-            setShowAnnouncements(false);
-            setShowAllQuickLinks(false);
+            // Navigate back to home page after successful publish
+            navigate('/home');
           }
         }}
       />
@@ -475,3 +502,4 @@ export const EventCreationPage: React.FC = () => {
   );
 };
 
+export default EventCreationPage;

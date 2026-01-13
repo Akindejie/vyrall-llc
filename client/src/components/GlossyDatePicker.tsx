@@ -18,6 +18,14 @@ export const GlossyDatePicker: React.FC<GlossyDatePickerProps> = ({
   );
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const previousValueRef = useRef<string | undefined>(value);
+  const isInternalUpdateRef = useRef(false);
+  const selectedDateRef = useRef(selectedDate);
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    selectedDateRef.current = selectedDate;
+  }, [selectedDate]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -35,12 +43,31 @@ export const GlossyDatePicker: React.FC<GlossyDatePickerProps> = ({
 
   // Update internal states when value prop changes
   useEffect(() => {
-    if (value) {
+    // Skip if this update was triggered internally
+    if (isInternalUpdateRef.current) {
+      isInternalUpdateRef.current = false;
+      return;
+    }
+
+    // Only update if value actually changed
+    if (value && value !== previousValueRef.current) {
       const date = new Date(value);
       if (!isNaN(date.getTime())) {
-        setSelectedDate(date);
-        setDisplayDate(date);
+        const currentSelectedTime = selectedDateRef.current.getTime();
+        const newTime = date.getTime();
+
+        // Only update if the date actually changed
+        if (currentSelectedTime !== newTime) {
+          // Use requestAnimationFrame to defer state updates
+          requestAnimationFrame(() => {
+            setSelectedDate(date);
+            setDisplayDate(date);
+          });
+        }
       }
+      previousValueRef.current = value;
+    } else if (!value && previousValueRef.current) {
+      previousValueRef.current = undefined;
     }
   }, [value]);
 
@@ -194,9 +221,9 @@ export const GlossyDatePicker: React.FC<GlossyDatePickerProps> = ({
               </div>
 
               <div className="grid grid-cols-7 gap-1 mb-2">
-                {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d) => (
+                {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, index) => (
                   <div
-                    key={d}
+                    key={`day-label-${index}`}
                     className="text-center text-xs font-semibold text-gray-400 py-1"
                   >
                     {d}

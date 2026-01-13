@@ -1,5 +1,5 @@
 import React, { useRef, type ChangeEvent } from 'react';
-import { uploadImage } from '../api/eventApi';
+import { uploadImage } from '../api/appApi';
 import type { ImageUploadProps } from '../types';
 
 export const ImageUpload: React.FC<ImageUploadProps> = ({
@@ -7,9 +7,12 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
   onImageChange,
   type,
   className = '',
+  onFileSizeError,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = React.useState(false);
+
+  const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
 
   const handleFileSelect = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -17,13 +20,30 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      alert('Please select an image file');
+      if (onFileSizeError) {
+        onFileSizeError('Please select an image file');
+      } else {
+        alert('Please select an image file');
+      }
       return;
     }
 
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Image size must be less than 5MB');
+    // Validate file size (max 2MB)
+    if (file.size > MAX_FILE_SIZE) {
+      const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+      const fileSizeKB = Math.round(file.size / 1024);
+      const maxSizeMB = (MAX_FILE_SIZE / (1024 * 1024)).toFixed(0);
+      const maxSizeKB = MAX_FILE_SIZE / 1024;
+      const message = `File size (${fileSizeMB}MB / ${fileSizeKB}KB) exceeds the maximum allowed size of ${maxSizeMB}MB (${maxSizeKB}KB). Please choose a smaller image.`;
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      if (onFileSizeError) {
+        onFileSizeError(message);
+      } else {
+        alert(message);
+      }
       return;
     }
 
@@ -33,11 +53,30 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
       if (response.success && response.data) {
         onImageChange(response.data.url);
       } else {
-        alert(response.error || 'Failed to upload image');
+        const errorMessage = response.error || 'Failed to upload image';
+        // Reset file input on error
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        if (onFileSizeError) {
+          onFileSizeError(errorMessage);
+        } else {
+          alert(errorMessage);
+        }
       }
     } catch (error) {
       console.error('Upload error:', error);
-      alert('Failed to upload image');
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to upload image';
+      // Reset file input on error
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      if (onFileSizeError) {
+        onFileSizeError(errorMessage);
+      } else {
+        alert(errorMessage);
+      }
     } finally {
       setIsUploading(false);
     }
